@@ -308,7 +308,7 @@ ALTER USER IF EXISTS IRC_CLIENT_ANALYST
 --   PARAMETER_COMMENT = 'Enable persistence refresh for Horizon IRC demo';
 
 -- ─────────────────────────────────────────────
--- 9. COMPUTE POOL FOR NOTEBOOK CONTAINER RUNTIME
+-- 9a. COMPUTE POOL FOR NOTEBOOK CONTAINER RUNTIME
 -- ─────────────────────────────────────────────
 CREATE COMPUTE POOL IF NOT EXISTS SPARK_DEMO_POOL
   MIN_NODES = 1
@@ -316,6 +316,37 @@ CREATE COMPUTE POOL IF NOT EXISTS SPARK_DEMO_POOL
   INSTANCE_FAMILY = CPU_X64_S;
 
 GRANT USAGE ON COMPUTE POOL SPARK_DEMO_POOL TO ROLE DATA_ENGINEER;
+
+-- ─────────────────────────────────────────────
+-- 9b. NETWORK POLICY — WHITELIST CONTAINER IP
+-- ─────────────────────────────────────────────
+-- The Snowflake Notebook Container Runtime has an outbound IP that must be
+-- allowed in your account's network policy. Without this, the Spark session
+-- cannot reach the Horizon IRC endpoint and you'll get SSLHandshakeException
+-- or connection refused errors.
+--
+-- Step 1: Run the IP detection cell in the PySpark notebook (section 1b)
+--         to get the container's outbound IP address.
+--
+-- Step 2: Check your existing network policies:
+SHOW NETWORK POLICIES;
+-- DESCRIBE NETWORK POLICY <policy_name>;
+SHOW PARAMETERS LIKE 'network_policy' IN ACCOUNT;
+
+-- Step 3: Add the container IP to your policy. Replace <CONTAINER_IP> with the
+--         IP from step 1, and include any existing allowed IPs.
+--
+-- Option A: Update an existing policy
+-- ALTER NETWORK POLICY <your_policy_name>
+--   SET ALLOWED_IP_LIST = ('<CONTAINER_IP>', '<existing_IPs>');
+--
+-- Option B: Create a new policy (if none exists)
+-- CREATE NETWORK POLICY IF NOT EXISTS HORIZON_IRC_DEMO_POLICY
+--   ALLOWED_IP_LIST = ('<CONTAINER_IP>');
+-- ALTER ACCOUNT SET NETWORK_POLICY = HORIZON_IRC_DEMO_POLICY;
+--
+-- NOTE: Container IPs may change when the compute pool restarts.
+-- Re-run the IP detection cell and update the policy if you get connection errors.
 
 -- ─────────────────────────────────────────────
 -- 10. VALIDATION QUERIES
