@@ -1,6 +1,9 @@
 # Plan file (local only, not for GitHub)
 PLAN.md
 
+# Cursor rules (local only)
+.cursor/
+
 # Secrets and credentials
 .env
 *.pem
