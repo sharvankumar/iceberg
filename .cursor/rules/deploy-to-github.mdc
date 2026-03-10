@@ -1,0 +1,46 @@
+---
+description: Rule for deploying code to the GitHub repository for this project
+alwaysApply: true
+---
+
+# Deploy to GitHub
+
+## Repository
+
+- **Remote**: `origin` -> `https://github.com/sharvankumar/iceberg.git`
+- **Default branch**: `main`
+
+## Deployment Steps
+
+When asked to deploy, push, or publish changes to GitHub:
+
+1. **Stage changes**: `git add .` (or specific files if requested)
+2. **Commit**: Create a descriptive commit message summarizing the changes
+3. **Push**: `git push -u origin main` (or the current branch)
+
+## Branch Workflow
+
+- Always confirm the current branch before pushing: `git branch --show-current`
+- For new features, create a branch: `git checkout -b feature/<name>`
+- Push feature branches with: `git push -u origin <branch-name>`
+- Use `git push -u origin HEAD` as a shortcut to push the current branch
+
+## Safety Rules
+
+- Never force push (`--force`) to `main` without explicit user approval
+- Never modify git config (user.name, user.email) automatically
+- Always show `git status` before committing so the user can review
+- Warn if committing files that look like secrets (`.env`, credentials, keys)
+- Never skip git hooks unless explicitly asked
+
+## Commit Message Convention
+
+Use concise commit messages in this format:
+
+```
+<type>: <short description>
+
+<optional body>
+```
+
+Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `build`
