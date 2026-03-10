@@ -7,29 +7,26 @@ infrastructure required.
 
 ## Architecture
 
-```text
-┌──────────────────────────────────────────────────────────────────┐
-│  Snowflake Notebook Container Runtime                            │
-│  ┌────────────────────────────────────┐                          │
-│  │  PySpark (local[*])                │                          │
-│  │  + Iceberg REST Catalog Client     │                          │
-│  └──────────┬─────────────────────────┘                          │
-│             │ HTTPS (PAT or Key-Pair)                            │
-│             ▼                                                    │
-│  ┌──────────────────────────────────────┐                        │
-│  │  Horizon IRC REST API               │                        │
-│  │  /polaris/api/catalog               │                        │
-│  │  (RBAC + Masking + Row Access)      │                        │
-│  └──────────┬───────────────────────────┘                        │
-│             │ Vended Credentials                                 │
-│             ▼                                                    │
-│  ┌──────────────────────────────────────┐                        │
-│  │  S3 External Volume                 │                        │
-│  │  (Iceberg data + metadata files)    │                        │
-│  └──────────────────────────────────────┘                        │
-└──────────────────────────────────────────────────────────────────┘
-```
+```mermaid
+graph TD
+    subgraph snowflake [Snowflake Account]
+        subgraph container [Notebook Container Runtime]
+            spark["PySpark (local[*])<br/>+ Iceberg REST Catalog Client"]
+        end
 
+        spark -->|"HTTPS (PAT or Key-Pair)"| horizon
+
+        subgraph horizon_box [Horizon Catalog]
+            horizon["Horizon IRC REST API<br/>/polaris/api/catalog<br/>(RBAC + Masking + Row Access)"]
+        end
+
+        horizon -->|"Vended Credentials"| s3
+
+        subgraph storage [External Storage]
+            s3["S3 External Volume<br/>(Iceberg data + metadata files)"]
+        end
+    end
+```
 ## What This Demo Shows
 
 | Feature | How It's Demonstrated |
