@@ -255,11 +255,13 @@ GRANT SELECT ON TABLE ICEBERG_DEMO_DB.SALES.PRODUCT_CATALOG TO ROLE DATA_ANALYST
 ALTER USER IF EXISTS IRC_CLIENT_ENGINEER
   ADD PROGRAMMATIC ACCESS TOKEN ENGINEER_PAT
     DAYS_TO_EXPIRY = 30
+    ROLE_RESTRICTION = 'DATA_ENGINEER'
     COMMENT = 'Horizon IRC demo - DATA_ENGINEER';
 
 ALTER USER IF EXISTS IRC_CLIENT_ANALYST
   ADD PROGRAMMATIC ACCESS TOKEN ANALYST_PAT
     DAYS_TO_EXPIRY = 30
+    ROLE_RESTRICTION = 'DATA_ANALYST'
     COMMENT = 'Horizon IRC demo - DATA_ANALYST';
 
 -- >> IMPORTANT: Copy the PAT values from the output above.
@@ -330,10 +332,28 @@ SELECT * FROM ICEBERG_DEMO_DB.ANALYTICS.USER_PROFILES ORDER BY user_id;
 
 -- As Analyst: should see only SALES, only US-WEST orders (4 rows)
 USE ROLE DATA_ANALYST;
+USE SECONDARY ROLES NONE;
+SELECT CURRENT_ROLE() AS active_role;  -- verify this shows DATA_ANALYST before continuing
+USE DATABASE ICEBERG_DEMO_DB;
+USE SCHEMA SALES;
+
 SELECT 'CUSTOMER_ORDERS (analyst)' AS test, COUNT(*) AS row_count FROM ICEBERG_DEMO_DB.SALES.CUSTOMER_ORDERS;
 SELECT 'PRODUCT_CATALOG (analyst)' AS test, COUNT(*) AS row_count FROM ICEBERG_DEMO_DB.SALES.PRODUCT_CATALOG;
 SELECT * FROM ICEBERG_DEMO_DB.SALES.CUSTOMER_ORDERS ORDER BY order_id;
 
--- These should FAIL for analyst:
--- SELECT * FROM ICEBERG_DEMO_DB.ANALYTICS.USER_PROFILES;    -- no access
--- SELECT * FROM ICEBERG_DEMO_DB.RESTRICTED.REVENUE_SUMMARY; -- no access
+/*
+If these queries below RETURN data instead of failing, it is because secondary roles
+are set to ALL. When secondary roles = ALL, privileges from all your granted roles
+(e.g. ACCOUNTADMIN) are inherited alongside DATA_ANALYST, bypassing RBAC restrictions.
+
+Fix: run USE SECONDARY ROLES NONE before testing. This isolates the session to only
+the active role's privileges — which is what an external PAT-based client would have.
+Re-enable with USE SECONDARY ROLES ALL when done.
+*/
+
+-- These should FAIL for analyst (expect "Insufficient privileges" errors):
+SELECT * FROM ICEBERG_DEMO_DB.ANALYTICS.USER_PROFILES;    -- no access
+SELECT * FROM ICEBERG_DEMO_DB.RESTRICTED.REVENUE_SUMMARY; -- no access
+
+-- Restore secondary roles when done validating
+USE SECONDARY ROLES ALL;
