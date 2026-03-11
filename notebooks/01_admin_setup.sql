@@ -336,14 +336,20 @@ SHOW PARAMETERS LIKE 'network_policy' IN ACCOUNT;
 -- Step 3: Add the container IP to your policy. Replace <CONTAINER_IP> with the
 --         IP from step 1, and include any existing allowed IPs.
 --
--- Option A: Update an existing policy
--- ALTER NETWORK POLICY <your_policy_name>
---   SET ALLOWED_IP_LIST = ('<CONTAINER_IP>', '<existing_IPs>');
---
--- Option B: Create a new policy (if none exists)
--- CREATE NETWORK POLICY IF NOT EXISTS HORIZON_IRC_DEMO_POLICY
---   ALLOWED_IP_LIST = ('<CONTAINER_IP>');
--- ALTER ACCOUNT SET NETWORK_POLICY = HORIZON_IRC_DEMO_POLICY;
+-- create a new policy if required;
+/*
+CREATE OR REPLACE NETWORK RULE ICEBERG_DEMO_DB.public.irc_spark_network_rule
+  MODE = 'INGRESS'
+  TYPE = 'IPV4'
+  VALUE_LIST = ('153.45.59.0/24');
+
+-- Step 4: Add the rule to the existing account network policy.
+--         ADD appends to the existing list without overwriting other rules.
+ALTER NETWORK POLICY ACCOUNT_VPN_POLICY_SE
+  ADD ALLOWED_NETWORK_RULE_LIST = (
+    ICEBERG_DEMO_DB.public.irc_spark_network_rule
+  );
+*/
 --
 -- NOTE: Container IPs may change when the compute pool restarts.
 -- Re-run the IP detection cell and update the policy if you get connection errors.
