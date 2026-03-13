@@ -330,7 +330,6 @@ GRANT USAGE ON COMPUTE POOL SPARK_DEMO_POOL TO ROLE DATA_ENGINEER;
 --
 -- Step 2: Check your existing network policies:
 SHOW NETWORK POLICIES;
--- DESCRIBE NETWORK POLICY <policy_name>;
 SHOW PARAMETERS LIKE 'network_policy' IN ACCOUNT;
 
 -- Step 3: Add the container IP to your policy. Replace <CONTAINER_IP> with the
@@ -352,7 +351,9 @@ ALTER NETWORK POLICY ACCOUNT_VPN_POLICY_SE
 */
 --
 -- NOTE: Container IPs may change when the compute pool restarts.
--- Re-run the IP detection cell and update the policy if you get connection errors.
+-- Re-run the IP detection cell and update the network rule:
+--   ALTER NETWORK RULE allow_horizon_irc_spark_network_rule
+--     SET VALUE_LIST = ('<NEW_CONTAINER_IP>');
 
 -- ─────────────────────────────────────────────
 -- 10. VALIDATION QUERIES

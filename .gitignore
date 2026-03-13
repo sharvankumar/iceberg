@@ -1,6 +1,10 @@
 # Plan file (local only, not for GitHub)
 PLAN.md
 
+# Reference files (internal only, not for GitHub)
+SPARK_2_ICEBERG_GLUE.ipynb
+[INTERNAL]*
+
 # Cursor rules (local only)
 .cursor/
 
