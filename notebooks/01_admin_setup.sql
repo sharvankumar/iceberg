@@ -355,6 +355,22 @@ ALTER NETWORK POLICY ACCOUNT_VPN_POLICY_SE
 --   ALTER NETWORK RULE allow_horizon_irc_spark_network_rule
 --     SET VALUE_LIST = ('<NEW_CONTAINER_IP>');
 
+ 
+
+-- If needs to create the EAI for Notebook to download the spark and Java libraries , use the below sql and then use this in Notebook.
+
+/*
+CREATE NETWORK RULE SKUMAR.PUBLIC.ALLOW_ALL_RULE
+  TYPE = HOST_PORT
+  MODE = EGRESS
+  VALUE_LIST = ('0.0.0.0:443', '0.0.0.0:80', 'your-account.snowflakecomputing.com');
+
+CREATE OR REPLACE EXTERNAL ACCESS INTEGRATION SKUMAR_NOTEBOOK_ALL_ALL_EAI
+  ALLOWED_NETWORK_RULES = (SKUMAR.PUBLIC.ALLOW_ALL_RULE)
+  ENABLED = TRUE;
+
+*/
+
 -- ─────────────────────────────────────────────
 -- 10. VALIDATION QUERIES
 -- ─────────────────────────────────────────────
